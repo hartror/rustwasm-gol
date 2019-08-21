@@ -84,16 +84,7 @@ impl Universe {
     pub fn new() -> Universe {
         let width = 64;
         let height = 64;
-
-        let cells = (0..width * height)
-            .map(|i| {
-                if i % 2 == 0 || i % 7 == 0 {
-                    Cell::Alive
-                } else {
-                    Cell::Dead
-                }
-            })
-            .collect();
+        let cells = cells_single_glider(width, height);
 
         Universe {
             width,
@@ -131,4 +122,27 @@ impl fmt::Display for Universe {
 
         Ok(())
     }
+}
+
+/// Generate cells for width * height with repeating pattern
+pub fn cells_repeating_pattern(width: u32, height: u32) -> Vec<Cell> {
+    (0..width * height)
+        .map(|i| {
+            if i % 2 == 0 || i % 7 == 0 {
+                Cell::Alive
+            } else {
+                Cell::Dead
+            }
+        })
+        .collect()
+}
+
+pub fn cells_single_glider(width: u32, height: u32) -> Vec<Cell> {
+    let mut cells: Vec<Cell> = (0..width * height).map(|_| Cell::Dead).collect();
+    cells[1] = Cell::Alive;
+    cells[2 + (width as usize)] = Cell::Alive;
+    cells[0 + (width * 2) as usize] = Cell::Alive;
+    cells[1 + (width * 2) as usize] = Cell::Alive;
+    cells[2 + (width * 2) as usize] = Cell::Alive;
+    cells
 }
