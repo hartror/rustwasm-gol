@@ -1,7 +1,10 @@
 mod utils;
 
+extern crate web_sys;
+
 use std::fmt;
 
+use js_sys::Math::random;
 use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
@@ -9,6 +12,13 @@ use wasm_bindgen::prelude::*;
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+// A macro to provide `println!(..)`-style syntax for `console.log` logging.
+macro_rules! log {
+    ( $( $t:tt )* ) => {
+        web_sys::console::log_1(&format!( $( $t )* ).into());
+    }
+}
 
 #[wasm_bindgen]
 #[repr(u8)]
@@ -84,7 +94,7 @@ impl Universe {
     pub fn new() -> Universe {
         let width = 64;
         let height = 64;
-        let cells = cells_single_glider(width, height);
+        let cells = cells_random(width, height);
 
         Universe {
             width,
@@ -137,6 +147,7 @@ pub fn cells_repeating_pattern(width: u32, height: u32) -> Vec<Cell> {
         .collect()
 }
 
+/// Generate cells with a single glider
 pub fn cells_single_glider(width: u32, height: u32) -> Vec<Cell> {
     let mut cells: Vec<Cell> = (0..width * height).map(|_| Cell::Dead).collect();
     cells[1] = Cell::Alive;
@@ -145,4 +156,17 @@ pub fn cells_single_glider(width: u32, height: u32) -> Vec<Cell> {
     cells[1 + (width * 2) as usize] = Cell::Alive;
     cells[2 + (width * 2) as usize] = Cell::Alive;
     cells
+}
+
+// Generate cells randomly
+pub fn cells_random(width: u32, height: u32) -> Vec<Cell> {
+    (0..width * height)
+        .map(|_| {
+            if (random() * 2.0).floor() as u64 == 1 {
+                Cell::Alive
+            } else {
+                Cell::Dead
+            }
+        })
+        .collect()
 }
